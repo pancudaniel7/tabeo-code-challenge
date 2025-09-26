@@ -6,3 +6,5 @@ target/
 .history/
 
 *.iml
+.DS_Store
+.idea/
