@@ -7,7 +7,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func HttpHandleError(ctx fiber.Ctx, err error) error {
+func HttpDefaultHandleError(ctx fiber.Ctx, err error) error {
 	var nf *NotFoundErr
 	var ae *AlreadyExistsErr
 	var ia *InvalidArgErr
