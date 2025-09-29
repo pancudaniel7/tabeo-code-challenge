@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
+	"tabeo.org/challenge/internal/pkg/logger"
 
 	"tabeo.org/challenge/internal/infra"
-	"tabeo.org/challenge/pkg/logger"
 )
 
 var (
