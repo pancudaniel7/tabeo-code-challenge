@@ -1,67 +1,51 @@
 package apperr
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
-type InvalidArgErr struct {
-	Msg   string
-	Cause error
+type Code string
+
+const (
+	InvalidArgument Code = "INVALID_ARGUMENT"
+	InternalError   Code = "INTERNAL_ERROR"
+	NotFound        Code = "NOT_FOUND"
+	AlreadyExists   Code = "ALREADY_EXISTS"
+)
+
+type Error struct {
+	code Code
+	msg  string
+	err  error
 }
 
-func (e *InvalidArgErr) Error() string {
-	if e.Cause != nil {
-		return fmt.Sprintf("[INVALID_ARGUMENT] %s: %v", e.Msg, e.Cause)
+func New(code Code, msg string, cause error) *Error { return &Error{code: code, msg: msg, err: cause} }
+func Invalid(msg string, cause error) *Error        { return New(InvalidArgument, msg, cause) }
+func Internal(msg string, cause error) *Error       { return New(InternalError, msg, cause) }
+func NotFoundErr(msg string, cause error) *Error    { return New(NotFound, msg, cause) }
+func Exists(msg string, cause error) *Error         { return New(AlreadyExists, msg, cause) }
+
+func (e *Error) Error() string {
+	if e.err != nil {
+		return fmt.Sprintf("[%s] %s: %v", e.code, e.msg, e.err)
 	}
-	return "[INVALID_ARGUMENT] " + e.Msg
-}
-func (e *InvalidArgErr) Code() string      { return "INVALID_ARGUMENT" }
-func (e *InvalidArgErr) Message() string   { return e.Msg }
-func (e *InvalidArgErr) CauseError() error { return e.Cause }
-func (e *InvalidArgErr) Unwrap() error     { return e.Cause }
-
-type InternalErr struct {
-	Msg   string
-	Cause error
+	return fmt.Sprintf("[%s] %s", e.code, e.msg)
 }
 
-func (e *InternalErr) Error() string {
-	if e.Cause != nil {
-		return fmt.Sprintf("[INTERNAL_ERROR] %s: %v", e.Msg, e.Cause)
+func (e *Error) Unwrap() error   { return e.err }
+func (e *Error) Code() Code      { return e.code }
+func (e *Error) Message() string { return e.msg }
+
+func IsCode(err error, code Code) bool {
+	var ce *Error
+	if errors.As(err, &ce) {
+		return ce.code == code
 	}
-	return "[INTERNAL_ERROR] " + e.Msg
-}
-func (e *InternalErr) Code() string      { return "INTERNAL_ERROR" }
-func (e *InternalErr) Message() string   { return e.Msg }
-func (e *InternalErr) CauseError() error { return e.Cause }
-func (e *InternalErr) Unwrap() error     { return e.Cause }
-
-type NotFoundErr struct {
-	Msg   string
-	Cause error
+	return false
 }
 
-func (e *NotFoundErr) Error() string {
-	if e.Cause != nil {
-		return fmt.Sprintf("[NOT_FOUND] %s: %v", e.Msg, e.Cause)
-	}
-	return "[NOT_FOUND] " + e.Msg
-}
-func (e *NotFoundErr) Code() string      { return "NOT_FOUND" }
-func (e *NotFoundErr) Message() string   { return e.Msg }
-func (e *NotFoundErr) CauseError() error { return e.Cause }
-func (e *NotFoundErr) Unwrap() error     { return e.Cause }
-
-type AlreadyExistsErr struct {
-	Msg   string
-	Cause error
-}
-
-func (e *AlreadyExistsErr) Error() string {
-	if e.Cause != nil {
-		return fmt.Sprintf("[ALREADY_EXISTS] %s: %v", e.Msg, e.Cause)
-	}
-	return "[ALREADY_EXISTS] " + e.Msg
-}
-func (e *AlreadyExistsErr) Code() string      { return "ALREADY_EXISTS" }
-func (e *AlreadyExistsErr) Message() string   { return e.Msg }
-func (e *AlreadyExistsErr) CauseError() error { return e.Cause }
-func (e *AlreadyExistsErr) Unwrap() error     { return e.Cause }
+func IsInvalid(err error) bool  { return IsCode(err, InvalidArgument) }
+func IsInternal(err error) bool { return IsCode(err, InternalError) }
+func IsNotFound(err error) bool { return IsCode(err, NotFound) }
+func IsExists(err error) bool   { return IsCode(err, AlreadyExists) }
