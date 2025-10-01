@@ -1,7 +1,7 @@
 package integration
 
 import (
-	"fmt"
+	"github.com/gofiber/fiber/v3/log"
 	"os"
 	"tabeo.org/challenge/internal/core/entity"
 	"testing"
@@ -20,15 +20,15 @@ func TestMain(m *testing.M) {
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "connect failed:", err)
+		log.Fatal("failed to connect database:", err)
 		os.Exit(1)
 	}
 	if err := db.AutoMigrate(&entity.Appointment{}); err != nil {
-		fmt.Fprintln(os.Stderr, "migrate failed:", err)
+		log.Fatal("migrate failed:", err)
 		os.Exit(1)
 	}
 	if err := clean(db); err != nil {
-		fmt.Fprintln(os.Stderr, "pre-clean failed:", err)
+		log.Fatal("clean failed:", err)
 		os.Exit(1)
 	}
 
