@@ -12,6 +12,7 @@ const (
 	InternalError   Code = "INTERNAL_ERROR"
 	NotFound        Code = "NOT_FOUND"
 	AlreadyExists   Code = "ALREADY_EXISTS"
+	BadGatewayError Code = "BAD_GATEWAY"
 )
 
 type Error struct {
@@ -25,6 +26,7 @@ func Invalid(msg string, cause error) *Error        { return New(InvalidArgument
 func Internal(msg string, cause error) *Error       { return New(InternalError, msg, cause) }
 func NotFoundErr(msg string, cause error) *Error    { return New(NotFound, msg, cause) }
 func Exists(msg string, cause error) *Error         { return New(AlreadyExists, msg, cause) }
+func BadGateway(msg string, cause error) *Error     { return New(BadGatewayError, msg, cause) }
 
 func (e *Error) Error() string {
 	if e.err != nil {
@@ -45,7 +47,8 @@ func IsCode(err error, code Code) bool {
 	return false
 }
 
-func IsInvalid(err error) bool  { return IsCode(err, InvalidArgument) }
-func IsInternal(err error) bool { return IsCode(err, InternalError) }
-func IsNotFound(err error) bool { return IsCode(err, NotFound) }
-func IsExists(err error) bool   { return IsCode(err, AlreadyExists) }
+func IsInvalid(err error) bool    { return IsCode(err, InvalidArgument) }
+func IsInternal(err error) bool   { return IsCode(err, InternalError) }
+func IsNotFound(err error) bool   { return IsCode(err, NotFound) }
+func IsExists(err error) bool     { return IsCode(err, AlreadyExists) }
+func IsBadGateway(err error) bool { return IsCode(err, BadGatewayError) }

@@ -2,6 +2,7 @@ package integration
 
 import (
 	"github.com/gofiber/fiber/v3/log"
+	"github.com/spf13/viper"
 	"os"
 	"tabeo.org/challenge/internal/core/entity"
 	"testing"
@@ -46,4 +47,11 @@ func clean(db *gorm.DB) error {
 		Exec("DELETE FROM appointment").
 		Exec("SET FOREIGN_KEY_CHECKS=1")
 	return tx.Error
+}
+
+func setupCacheConfig() {
+	viper.Set("cache.host", "localhost")
+	viper.Set("cache.port", 6379)
+	viper.Set("cache.db", 0)
+	viper.Set("cache.ttl", 10) // short TTL for test
 }

@@ -14,7 +14,7 @@ import (
 
 func withTx(t *testing.T) *gorm.DB {
 	tx := testDB.Begin()
-	//t.Cleanup(func() { _ = tx.Rollback() })
+	t.Cleanup(func() { _ = tx.Rollback() })
 	return tx
 }
 

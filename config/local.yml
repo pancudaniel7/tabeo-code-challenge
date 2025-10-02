@@ -5,3 +5,11 @@ log:
   level: "info"
   json: false
 
+cache:
+  ttl: 86400
+  host: localhost
+  port: 6379
+  db: 0
+
+holiday:
+  url: https://date.nager.at/api/v3/publicholidays/%d/%s

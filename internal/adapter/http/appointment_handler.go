@@ -30,6 +30,8 @@ func (b *AppointmentDefaultHandler) CreateAppointment(c fiber.Ctx) (*Appointment
 	if err != nil {
 		return nil, c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
+
+	// TODO: Call the use case to create the appointment
 	print(book)
 
 	return nil, c.SendStatus(fiber.StatusNotImplemented)
