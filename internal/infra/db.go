@@ -10,11 +10,11 @@ import (
 )
 
 func InitDB() *gorm.DB {
-	host := viper.GetString("db.host")
-	port := viper.GetString("db.port")
-	user := viper.GetString("db.user")
-	password := viper.GetString("db.password")
-	dbname := viper.GetString("db.name")
+	host := viper.GetString("database.host")
+	port := viper.GetString("database.port")
+	user := viper.GetString("database.user")
+	password := viper.GetString("database.password")
+	dbname := viper.GetString("database.name")
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=UTC", user, password, host, port, dbname)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})

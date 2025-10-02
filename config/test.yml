@@ -5,6 +5,13 @@ log:
   level: "info"
   json: false
 
+database:
+  host: localhost
+  port: 3307
+  user: tabeo_user
+  name: tabeo
+  password: password
+
 cache:
   ttl: 86400
   host: localhost
