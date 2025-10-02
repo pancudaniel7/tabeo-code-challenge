@@ -14,7 +14,7 @@ type HolidayDefaultClient struct {
 	client *http.Client
 }
 
-func NewHolidayClient() HolidayClient {
+func NewHolidayClient() *HolidayDefaultClient {
 	return &HolidayDefaultClient{
 		client: &http.Client{},
 	}

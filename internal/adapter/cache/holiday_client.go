@@ -13,12 +13,12 @@ import (
 	"tabeo.org/challenge/internal/pkg/apperr"
 )
 
-type RedisHolidayCacheClient struct {
+type HolidayDefaultCacheClient struct {
 	rdb *redis.Client
 	ttl time.Duration
 }
 
-func NewHolidayCacheClient() HolidayCacheClient {
+func NewHolidayCacheClient() *HolidayDefaultCacheClient {
 	host := viper.GetString("cache.host")
 	port := viper.GetInt("cache.port")
 	db := viper.GetInt("cache.db")
@@ -34,17 +34,17 @@ func NewHolidayCacheClient() HolidayCacheClient {
 		DB:       db,
 	})
 
-	return &RedisHolidayCacheClient{
+	return &HolidayDefaultCacheClient{
 		rdb: rdb,
 		ttl: time.Duration(ttl) * time.Second,
 	}
 }
 
-func (c *RedisHolidayCacheClient) key(year int, country string) string {
+func (c *HolidayDefaultCacheClient) key(year int, country string) string {
 	return fmt.Sprintf("publicholidays:%d:%s", year, country)
 }
 
-func (c *RedisHolidayCacheClient) GetPublicHolidays(ctx context.Context, year int, country string) ([]entity.PublicHolidays, error) {
+func (c *HolidayDefaultCacheClient) GetPublicHolidays(ctx context.Context, year int, country string) ([]entity.PublicHolidays, error) {
 	val, err := c.rdb.Get(ctx, c.key(year, country)).Result()
 	if errors.Is(err, redis.Nil) {
 		return nil, apperr.NotFoundErr("cache miss", nil)
@@ -65,7 +65,7 @@ func (c *RedisHolidayCacheClient) GetPublicHolidays(ctx context.Context, year in
 	return holidays, nil
 }
 
-func (c *RedisHolidayCacheClient) SetPublicHolidays(ctx context.Context, year int, country string, holidays []entity.PublicHolidays) error {
+func (c *HolidayDefaultCacheClient) SetPublicHolidays(ctx context.Context, year int, country string, holidays []entity.PublicHolidays) error {
 	resp := make([]*PublicHolidaysCacheDTO, len(holidays))
 	for i, h := range holidays {
 		resp[i] = resp[i].ToDTO(&h)

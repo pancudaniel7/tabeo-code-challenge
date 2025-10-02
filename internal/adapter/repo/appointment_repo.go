@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
+	"time"
 
 	"gorm.io/gorm"
 	"tabeo.org/challenge/internal/core/entity"
@@ -18,6 +19,20 @@ type AppointmentDefaultRepository struct {
 
 func NewAppointmentDefaultRepository(db *gorm.DB) *AppointmentDefaultRepository {
 	return &AppointmentDefaultRepository{DB: db}
+}
+
+func (r *AppointmentDefaultRepository) FindByVistDate(ctx context.Context, appointmentDate time.Time) (*entity.Appointment, error) {
+	var appointment entity.Appointment
+	if err := r.DB.WithContext(ctx).Where("visit_date = ?", appointmentDate).First(&appointment).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, apperr.NotFoundErr("appointment not found", err)
+		}
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return nil, apperr.Internal("operation canceled", err)
+		}
+		return nil, apperr.Internal("find appointment by visit date failed", err)
+	}
+	return &appointment, nil
 }
 
 // Create inserts a new appointment into the database

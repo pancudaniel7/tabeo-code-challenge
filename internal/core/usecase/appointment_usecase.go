@@ -3,8 +3,6 @@ package usecase
 import (
 	"context"
 	"github.com/spf13/viper"
-	"tabeo.org/challenge/internal/adapter/cache"
-	"tabeo.org/challenge/internal/adapter/http"
 	"tabeo.org/challenge/internal/core/entity"
 	"tabeo.org/challenge/internal/pkg/apperr"
 	"tabeo.org/challenge/internal/pkg/logger"
@@ -13,34 +11,41 @@ import (
 
 type AppointmentDefaultUseCase struct {
 	appointmentRepo     AppointmentRepository
-	holidaysCacheClient cache.HolidayCacheClient
-	holidaysHttpClient  http.HolidayClient
+	holidaysCacheClient HolidayCacheClient
+	holidaysHttpClient  HolidayHttpClient
 	logger              logger.AppLogger
 }
 
-func NewAppointmentDefaultUseCase(appointmentRepo AppointmentRepository, cacheClient cache.HolidayCacheClient, holidayClient http.HolidayClient, logger logger.AppLogger) AppointmentUseCase {
+func NewAppointmentDefaultUseCase(appointmentRepo AppointmentRepository, holidaysCacheClient HolidayCacheClient, holidayHttpClient HolidayHttpClient, logger logger.AppLogger) AppointmentUseCase {
 	return &AppointmentDefaultUseCase{
 		appointmentRepo:     appointmentRepo,
-		holidaysCacheClient: cacheClient,
-		holidaysHttpClient:  holidayClient,
+		holidaysCacheClient: holidaysCacheClient,
+		holidaysHttpClient:  holidayHttpClient,
 		logger:              logger,
 	}
 }
 
 // CreateAppointment creates a new appointment and checks for public holidays on the visit date.
-func (a AppointmentDefaultUseCase) CreateAppointment(ctx context.Context, appointment *entity.Appointment) (string, error) {
+func (a AppointmentDefaultUseCase) CreateAppointment(ctx context.Context, appointment *entity.Appointment) (*entity.Appointment, error) {
 	dismiss, err := a.dismissAppointment(ctx, appointment)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if dismiss {
-		return "", apperr.InvalidArgument("appointment date falls on a public holiday", nil)
-	}
-	if err := a.appointmentRepo.Create(ctx, appointment); err != nil {
-		return "", apperr.Internal("failed to create appointment", err)
+		return nil, apperr.InvalidArgument("appointment date falls on a public holiday", nil)
 	}
 
-	return appointment.ID.String(), nil
+	appointment.VisitDate = appointment.VisitDate.Truncate(24 * time.Hour)
+	fa, err := a.appointmentRepo.FindByVistDate(ctx, appointment.VisitDate)
+	if fa != nil {
+		return nil, apperr.Exists("appointment date already booked", nil)
+	}
+
+	if err := a.appointmentRepo.Create(ctx, appointment); err != nil {
+		return nil, apperr.Internal("failed to create appointment", err)
+	}
+
+	return appointment, nil
 }
 
 // dismissAppointment dismiss appointment because the date is a public holiday

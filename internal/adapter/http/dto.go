@@ -31,6 +31,15 @@ func (r *AppointmentRequest) ToEntity() (*entity.Appointment, error) {
 	}, nil
 }
 
+func (r *AppointmentRequest) ToDTO(a *entity.Appointment) *AppointmentResponse {
+	return &AppointmentResponse{
+		ID:        a.ID.String(),
+		FirstName: a.FirstName,
+		LastName:  a.LastName,
+		VisitDate: a.VisitDate.Format("2006-01-02"),
+	}
+}
+
 type PublicHolidaysResponse struct {
 	Date        string   `json:"date"`
 	LocalName   string   `json:"localName"`
