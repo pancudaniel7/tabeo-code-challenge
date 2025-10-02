@@ -1,9 +1,9 @@
 package integration
 
 import (
+	"github.com/spf13/viper"
 	"testing"
 
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 
 	"tabeo.org/challenge/internal/adapter/http"
@@ -11,7 +11,7 @@ import (
 )
 
 func TestRetrievePublicHolidays_Success(t *testing.T) {
-	viper.Set("holiday.url", "https://date.nager.at/api/v3")
+	initConfig()
 	client := http.NewHolidayClient()
 	year := 2025
 	country := "DE"
@@ -27,7 +27,7 @@ func TestRetrievePublicHolidays_Success(t *testing.T) {
 }
 
 func TestRetrievePublicHolidays_BadGateway(t *testing.T) {
-	viper.Set("holiday.url", "https://date.nager.at/api/v3")
+	initConfig()
 	client := http.NewHolidayClient()
 	year := 2025
 	country := "ZZZ"
@@ -38,7 +38,8 @@ func TestRetrievePublicHolidays_BadGateway(t *testing.T) {
 }
 
 func TestRetrievePublicHolidays_Internal_NoURL(t *testing.T) {
-	viper.Set("holiday.url", "")
+	initConfig()
+	viper.Set("holidays.url", "")
 	client := http.NewHolidayClient()
 	year := 2025
 	country := "DE"

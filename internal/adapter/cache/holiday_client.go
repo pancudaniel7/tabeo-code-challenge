@@ -60,35 +60,15 @@ func (c *RedisHolidayCacheClient) GetPublicHolidays(ctx context.Context, year in
 
 	holidays := make([]entity.PublicHolidays, len(resp))
 	for i, h := range resp {
-		holidays[i] = entity.PublicHolidays{
-			Date:        h.Date,
-			LocalName:   h.LocalName,
-			Name:        h.Name,
-			CountryCode: h.CountryCode,
-			Fixed:       h.Fixed,
-			Global:      h.Global,
-			Counties:    h.Counties,
-			LaunchYear:  h.LaunchYear,
-			Types:       h.Types,
-		}
+		holidays[i] = h.ToEntity()
 	}
 	return holidays, nil
 }
 
 func (c *RedisHolidayCacheClient) SetPublicHolidays(ctx context.Context, year int, country string, holidays []entity.PublicHolidays) error {
-	resp := make([]PublicHolidaysCacheDTO, len(holidays))
+	resp := make([]*PublicHolidaysCacheDTO, len(holidays))
 	for i, h := range holidays {
-		resp[i] = PublicHolidaysCacheDTO{
-			Date:        h.Date,
-			LocalName:   h.LocalName,
-			Name:        h.Name,
-			CountryCode: h.CountryCode,
-			Fixed:       h.Fixed,
-			Global:      h.Global,
-			Counties:    h.Counties,
-			LaunchYear:  h.LaunchYear,
-			Types:       h.Types,
-		}
+		resp[i] = resp[i].ToDTO(&h)
 	}
 	data, err := json.Marshal(resp)
 	if err != nil {

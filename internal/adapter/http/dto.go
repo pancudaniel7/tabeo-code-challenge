@@ -42,3 +42,17 @@ type PublicHolidaysResponse struct {
 	LaunchYear  int      `json:"launchYear"`
 	Types       []string `json:"types"`
 }
+
+func (r *PublicHolidaysResponse) ToEntity() entity.PublicHolidays {
+	return entity.PublicHolidays{
+		Date:        r.Date,
+		LocalName:   r.LocalName,
+		Name:        r.Name,
+		CountryCode: r.CountryCode,
+		Fixed:       r.Fixed,
+		Global:      r.Global,
+		Counties:    r.Counties,
+		LaunchYear:  r.LaunchYear,
+		Types:       r.Types,
+	}
+}

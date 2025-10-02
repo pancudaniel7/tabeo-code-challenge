@@ -29,7 +29,7 @@ func (r *AppointmentDefaultRepository) Create(ctx context.Context, a *entity.App
 			return apperr.Exists("visit date already booked", err)
 		}
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-			return err
+			return apperr.Internal("operation canceled", err)
 		}
 		return apperr.Internal("create appointment failed", err)
 	}

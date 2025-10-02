@@ -1,9 +1,11 @@
 package integration
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v3/log"
 	"github.com/spf13/viper"
 	"os"
+	"strings"
 	"tabeo.org/challenge/internal/core/entity"
 	"testing"
 
@@ -49,9 +51,24 @@ func clean(db *gorm.DB) error {
 	return tx.Error
 }
 
-func setupCacheConfig() {
-	viper.Set("cache.host", "localhost")
-	viper.Set("cache.port", 6379)
-	viper.Set("cache.db", 0)
-	viper.Set("cache.ttl", 10) // short TTL for test
+func initConfig() {
+	viper.SetEnvPrefix("TABEO")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	if err := viper.BindEnv("CONFIG_NAME"); err != nil {
+		log.Fatal(fmt.Sprintf("Fatal error binding env variable: %s", err))
+	}
+
+	viper.AutomaticEnv()
+	configName := viper.GetString("CONFIG_NAME")
+	if configName == "" {
+		configName = "test"
+	}
+
+	viper.SetConfigName(configName)
+	viper.SetConfigType("yml")
+	viper.AddConfigPath("../../config")
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatal(fmt.Sprintf("Fatal error reading config file: %s", err))
+	}
 }

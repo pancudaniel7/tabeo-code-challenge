@@ -21,12 +21,12 @@ func NewHolidayClient() HolidayClient {
 }
 
 func (h *HolidayDefaultClient) RetrievePublicHolidays(year int, country string) ([]entity.PublicHolidays, error) {
-	url := viper.GetString("holiday.url")
+	url := viper.GetString("holidays.url")
 	if url == "" {
 		return nil, apperr.Internal("holiday api url is not set", nil)
 	}
 
-	endpoint := fmt.Sprintf("%s/PublicHolidays/%d/%s", url, year, country)
+	endpoint := fmt.Sprintf(url, year, country)
 	resp, err := h.client.Get(endpoint)
 	if err != nil {
 		return nil, apperr.Internal("failed to call holiday API", err)
@@ -50,17 +50,7 @@ func (h *HolidayDefaultClient) RetrievePublicHolidays(year int, country string) 
 
 	holidays := make([]entity.PublicHolidays, len(holidaysResp))
 	for i, h := range holidaysResp {
-		holidays[i] = entity.PublicHolidays{
-			Date:        h.Date,
-			LocalName:   h.LocalName,
-			Name:        h.Name,
-			CountryCode: h.CountryCode,
-			Fixed:       h.Fixed,
-			Global:      h.Global,
-			Counties:    h.Counties,
-			LaunchYear:  h.LaunchYear,
-			Types:       h.Types,
-		}
+		holidays[i] = h.ToEntity()
 	}
 	return holidays, nil
 }

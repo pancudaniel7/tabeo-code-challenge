@@ -2,6 +2,7 @@ package integration
 
 import (
 	"context"
+	"github.com/spf13/viper"
 	"testing"
 	"time"
 
@@ -12,7 +13,10 @@ import (
 )
 
 func TestHolidayCacheClient_SetAndGetPublicHolidays(t *testing.T) {
-	setupCacheConfig()
+	initConfig()
+	viper.Set("cache.db", 0)
+	viper.Set("cache.ttl", 2)
+
 	client := cache.NewHolidayCacheClient()
 	ctx := context.Background()
 	year := 2025
@@ -41,14 +45,16 @@ func TestHolidayCacheClient_SetAndGetPublicHolidays(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, holidays, got)
 
-	time.Sleep(11 * time.Second)
+	time.Sleep(3 * time.Second)
 	_, err = client.GetPublicHolidays(ctx, year, country)
 	assert.Error(t, err)
 	assert.True(t, apperr.IsNotFound(err))
 }
 
 func TestHolidayCacheClient_SetInvalidData(t *testing.T) {
-	setupCacheConfig()
+	initConfig()
+	viper.Set("cache.db", 0)
+
 	client := cache.NewHolidayCacheClient()
 	ctx := context.Background()
 	year := 2025
@@ -63,7 +69,9 @@ func TestHolidayCacheClient_SetInvalidData(t *testing.T) {
 }
 
 func TestHolidayCacheClient_Integration_ConnectToExistingCache(t *testing.T) {
-	setupCacheConfig()
+	initConfig()
+	viper.Set("cache.db", 0)
+
 	client := cache.NewHolidayCacheClient()
 	ctx := context.Background()
 	year := 2026

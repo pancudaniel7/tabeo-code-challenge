@@ -15,6 +15,8 @@ func HttpHandleError(ctx fiber.Ctx, err error) error {
 		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": messageOf(err)})
 	case IsExists(err):
 		return ctx.Status(fiber.StatusConflict).JSON(fiber.Map{"error": messageOf(err)})
+	case IsInvalidArgument(err):
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": messageOf(err)})
 	case IsInvalid(err):
 		if errors.As(err, &ve) {
 			errorsMap := make(map[string]string)
